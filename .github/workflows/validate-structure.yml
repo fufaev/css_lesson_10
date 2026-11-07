@@ -1,0 +1,48 @@
+name: Проверка изоляции папок (CI)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-isolation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка исходного кода
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Проверка измененных файлов
+        run: |
+          echo "=== Список измененных файлов в Pull Request ==="
+          git diff --name-only origin/main...HEAD > changed_files.txt
+          cat changed_files.txt
+
+          # Флаг для отслеживания нарушений
+          VIOLATION=0
+
+          while IFS= read -r file; do
+            # Проверяем, что файл находится строго внутри персональной папки студента
+            # Шаблон пути: "Фамилия_Имя_Группа/..."
+            if [[ ! "$file" =~ ^[^/]+_[^/]+_[^/]+/ ]]; then
+              echo "❌ ОШИБКА: Файл '$file' изменен вне вашей персональной изолированной папки!"
+              VIOLATION=1
+            fi
+            
+            # Запрет на изменение скрытых файлов конфигурации
+            if [[ "$file" =~ ^\.github/ ]]; then
+              echo "❌ ОШИБКА: Запрещено изменять конфигурацию робота-валидатора!"
+              VIOLATION=1
+            fi
+          done < changed_files.txt
+
+          if [ $VIOLATION -eq 1 ]; then
+            echo "=========================================================="
+            echo "⛔ ТЕСТ ПРОВАЛЕН! Вы вышли за пределы своей папки."
+            echo "Исправьте Pull Request, иначе преподаватель его не увидит."
+            echo "=========================================================="
+            exit 1
+          else
+            echo "✅ ТЕСТ УСПЕШНО ПРОЙДЕН! Все изменения изолированы."
+          fi
