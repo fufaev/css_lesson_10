@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель управления платформы — ИТ-Лаборатория БГУ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- КОМПОНЕНТ НАВИГАЦИИ (Уровни BASE / JUNIOR / PRO) -->
+  <header class="main-header">
+    <div class="logo">BSU_Platform v4.0</div>
+    
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="#" class="nav-link">Главная</a></li>
+        <li><a href="#" class="nav-link">Проекты</a></li>
+        <li><a href="#" class="nav-link">Аналитика</a></li>
+        <li><a href="#" class="nav-link">Настройки</a></li>
+      </ul>
+    </nav>
+
+    <!-- Элемент для проверки JUNIOR-магии margin-left: auto -->
+    <a href="#logout" class="logout-btn">Выйти из системы</a>
+  </header>
+
+  <!-- СЕТКА КОНТЕНТА (Уровни BASE / JUNIOR / PRO) -->
+  <main class="dashboard-grid">
+
+    <!-- Карточка 1: Лидер-блок (Для PRO-тестирования свойства order) -->
+    <article class="stat-card is-lead">
+      <div class="card-header">
+        <h3>Глобальный статус</h3>
+        <span class="badge badge-active">Важно</span>
+      </div>
+      <p class="card-desc">Основной узел мониторинга платформы. На десктопе должен отображаться последним в ряду.</p>
+      
+      <!-- Структура списков определений (Уровень PRO) -->
+      <dl class="meta-list">
+        <dt>Стек:</dt>
+        <dd>.NET Core / React</dd>
+        <dt>Сервер:</dt>
+        <dd>beCloud Secure</dd>
+        <dt>Лицензия:</dt>
+        <dd>SaaS Annual</dd>
+      </dl>
+    </article>
+
+    <!-- Карточка 2: Мониторинг нагрузок -->
+    <article class="stat-card">
+      <div class="card-header">
+        <h3>Нагрузка на CPU</h3>
+      </div>
+      <p class="card-desc">Показатели процессорного времени инфраструктуры.</p>
+      <dl class="meta-list">
+        <dt>Текущая:</dt>
+        <dd>42%</dd>
+        <dt>Пиковая:</dt>
+        <dd>89%</dd>
+      </dl>
+    </article>
+
+    <!-- Карточка 3: Инженерный стресс-тест на 320px (Уровень PRO) -->
+    <article class="stat-card">
+      <div class="card-header">
+        <h3>Логи отладки агентов</h3>
+      </div>
+      <!-- Длинное непереносимое техническое слово длиной 46 символов -->
+      <p class="card-desc urgent-log">Критическая_ошибка_модуля_FlexboxContainerShrinkPropertiesOverflowTest_не_удалось_распарсить_пакет.</p>
+      <dl class="meta-list">
+        <dt>Код:</dt>
+        <dd>0xERR_500</dd>
+        <dt>Поток:</dt>
+        <dd>Main_Worker</dd>
+      </dl>
+    </article>
+
+  </main>
+
+</body>
+</html>
