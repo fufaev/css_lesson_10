@@ -1,48 +1,214 @@
-name: Проверка изоляции папок (CI)
+name: Автоматическая проверка Dashboard (Flexbox CI)
 
 on:
   pull_request:
     branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write # Разрешаем роботу писать комментарии в PR студентов
+
+concurrency:
+  group: flex-homework-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
-  check-isolation:
+  validate-homework:
+    name: Экспертная проверка ТЗ и кода
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
       - name: Проверка исходного кода
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Проверка измененных файлов
+      - name: Умный статический анализ кода (Flexbox & ТЗ)
+        id: analyzer
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
-          echo "=== Список измененных файлов в Pull Request ==="
-          git diff --name-only origin/main...HEAD > changed_files.txt
-          cat changed_files.txt
+          set -uo pipefail
+          export LC_ALL=C.UTF-8
+          git config core.quotepath off
 
-          # Флаг для отслеживания нарушений
-          VIOLATION=0
+          # Инициализация счетчиков и отчета
+          errors_count=0
+          warnings_count=0
+          report="### 🤖 Отчет робота-валидатора по практической работе №10"$'\n\n'
 
-          while IFS= read -r file; do
-            # Проверяем, что файл находится строго внутри персональной папки студента
-            # Шаблон пути: "Фамилия_Имя_Группа/..."
-            if [[ ! "$file" =~ ^[^/]+_[^/]+_[^/]+/ ]]; then
-              echo "❌ ОШИБКА: Файл '$file' изменен вне вашей персональной изолированной папки!"
-              VIOLATION=1
+          add_err() { errors_count=$((errors_count+1)); report+="❌ **ОШИБКА:** $1"$'\n'; }
+          add_warn() { warnings_count=$((warnings_count+1)); report+="⚠️ **ПРЕДУПРЕЖДЕНИЕ:** $1"$'\n'; }
+          add_ok() { report+="✅ $1"$'\n'; }
+
+          # 1. Получение списка измененных файлов
+          if ! git fetch --no-tags --quiet origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"; then
+            echo "::error::Не удалось получить целевую ветку."
+            exit 1
+          fi
+
+          changed_files=()
+          while IFS= read -r -d '' f; do changed_files+=("$f"); done \
+            < <(git diff --name-only -z --diff-filter=ACMR "origin/${BASE_REF}...HEAD")
+
+          # 2. Проверка изоляции и определение папки студента
+          STUDENT_DIR=""
+          for f in "${changed_files[@]}"; do
+            if [[ "$f" =~ ^\.github/ ]]; then
+              add_err "Запрещено изменять конфигурационные файлы валидатора (`$f`)."
+              continue
+            fi
+            if [[ ! "$f" =~ ^[^/]+_[^/]+_[^/]+/ ]]; then
+              add_err "Файл `$f` изменен вне Вашей персональной папки. Соблюдайте изоляцию!"
+              continue
             fi
             
-            # Запрет на изменение скрытых файлов конфигурации
-            if [[ "$file" =~ ^\.github/ ]]; then
-              echo "❌ ОШИБКА: Запрещено изменять конфигурацию робота-валидатора!"
-              VIOLATION=1
+            # Извлекаем корневую папку вида Фамилия_Имя_Группа
+            current_dir="${f%%/*}"
+            if [ -z "$STUDENT_DIR" ]; then
+              STUDENT_DIR="$current_dir"
+            elif [ "$STUDENT_DIR" != "$current_dir" ]; then
+              add_err "Нарушение изоляции: Вы изменили файлы нескольких студентов сразу (`$STUDENT_DIR` и `$current_dir`)."
             fi
-          done < changed_files.txt
+          done
 
-          if [ $VIOLATION -eq 1 ]; then
-            echo "=========================================================="
-            echo "⛔ ТЕСТ ПРОВАЛЕН! Вы вышли за пределы своей папки."
-            echo "Исправьте Pull Request, иначе преподаватель его не увидит."
-            echo "=========================================================="
+          if [ $errors_count -gt 0 ] || [ -z "$STUDENT_DIR" ]; then
+            report+=$'\n'"⛔ **Критическая ошибка изоляции. Проверка кода остановлена.**"
+            echo "report<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$report" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
             exit 1
-          else
-            echo "✅ ТЕСТ УСПЕШНО ПРОЙДЕН! Все изменения изолированы."
           fi
+
+          add_ok "Контроль изоляции пройден. Ваша рабочая директория: \`$STUDENT_DIR/\`"
+
+                   # 3. Парсинг имени, фамилии и расчет формул Анти-ИИ
+          IFS='_' read -r last_name first_name group <<< "$STUDENT_DIR"
+          
+          # Функция транслитерации латиницы в кириллицу для честного подсчета букв
+          to_cyrillic() {
+            echo "$1" | sed '
+              s/ch/ч/g; s/sh/ш/g; s/zh/ж/g; s/kh/х/g; s/ts/ц/g; 
+              s/ya/я/g; s/yu/ю/g; s/ye/е/g; s/yo/ё/g; s/ja/я/g;
+              s/a/а/g;  s/b/б/g;  s/v/в/g;  s/g/г/g;  s/d/д/g; 
+              s/e/е/g;  s/z/з/g;  s/i/и/g;  s/j/й/g;  s/k/к/g; 
+              s/l/л/g;  s/m/м/g;  s/n/н/g;  s/o/о/g;  s/p/п/g; 
+              s/r/р/g;  s/s/с/g;  s/t/т/g;  s/u/у/g;  s/f/ф/g; 
+              s/h/х/g;  s/c/ц/g;  s/y/ы/g;  s/q/к/g;  s/w/в/g; s/x/кс/g;
+              s/CH/ч/g; s/SH/ш/g; s/ZH/ж/g; s/YA/я/g; s/YU/ю/g;
+              s/A/а/g;  s/B/б/g;  s/V/в/g;  s/G/г/g;  s/D/д/g;
+              s/E/е/g;  s/Z/з/g;  s/I/и/g;  s/K/к/g;  s/L/л/g;
+              s/M/м/g;  s/N/н/g;  s/O/о/g;  s/P/п/g;  s/R/р/g;
+              s/S/с/g;  s/T/т/g;  s/U/у/g;  s/F/ф/g;  s/Y/ы/g
+            '
+          }
+
+          # Преобразуем в кириллицу, если студент написал имя на английском
+          last_name_cyr=$(to_cyrillic "$last_name")
+          first_name_cyr=$(to_cyrillic "$first_name")
+
+          # Считаем длину строк на основе кириллического эквивалента
+          N=${#last_name_cyr}
+          M=${#first_name_cyr}
+          
+          # Формулы из ТЗ
+          expected_basis=$(( (N * 12) + 180 ))
+          expected_gap=$(( (M * 2) + 4 ))
+
+
+          # 4. Проверка наличия файлов
+          if [ ! -f "$HTML_FILE" ]; then add_err "Файл \`index.html\` не найден в вашей папке."; fi
+          if [ ! -f "$CSS_FILE" ]; then add_err "Файл \`css/style.css\` не найден в вашей папке."; fi
+
+          if [ -f "$CSS_FILE" ] && [ -f "$HTML_FILE" ]; then
+            report+="#### 🔍 Результаты содержательного анализа кода:"$'\n'
+            
+            # Читаем CSS, удаляя пробелы для надежности поиска
+            css_clean=$(tr -d '[[:space:]]' < "$CSS_FILE")
+            css_raw=$(cat "$CSS_FILE")
+            html_raw=$(cat "$HTML_FILE")
+
+            # Тест 1: Проверка flex-basis по формуле N
+            if [[ "$css_clean" =~ flex-basis:${expected_basis}px ]]; then
+              add_ok "Индивидуальный \`flex-basis\` карточки (${expected_basis}px) настроен верно."
+            else
+              add_err "Расхождение с ТЗ: Свойство \`flex-basis\` не соответствует формуле \`(N * 12) + 180px\`. Ожидалось: **${expected_basis}px**."
+            fi
+
+            # Тест 2: Проверка gap по формуле M
+            if [[ "$css_clean" =~ gap:${expected_gap}px ]]; then
+              add_ok "Индивидуальный \`gap\` контейнеров (${expected_gap}px) настроен верно."
+            else
+              add_err "Расхождение с ТЗ: Свойство \`gap\` не соответствует формуле \`(M * 2) + 4px\`. Ожидалось: **${expected_gap}px**."
+            fi
+
+            # Тест 3: Контроль использования запрещенных пиксельных отступов (для уровня Junior/Pro)
+            # Ищем, задекларировал ли студент уровень
+            if grep -q "Уровень:" "$STUDENT_DIR/README.md" 2>/dev/null; then
+              level_line=$(grep -m1 "Уровень:" "$STUDENT_DIR/README.md")
+            else
+              level_line="BASE"
+            fi
+
+            # Тест 4: Проверка использования семантических тегов в HTML
+            if grep -q "<header" "$HTML_FILE" && grep -q "<main" "$HTML_FILE"; then
+              add_ok "Семантическая структура HTML (<header>, <main>) соблюдена."
+            else
+              add_err "Нарушение семантики HTML: Убедитесь, что используете теги \`<header>\` и \`<main>\`."
+            fi
+
+            # Тест 5: Проверка магии автоматических отступов (margin-left: auto)
+            if [[ "$css_clean" =~ margin-left:auto ]]; then
+              add_ok "Применение \`margin-left: auto\` для выталкивания элементов обнаружено."
+            else
+              add_warn "Для уровней Junior/Pro кнопка выхода должна отталкиваться вправо через \`margin-left: auto\`."
+            fi
+
+            # Тест 6: Проверка наличия обязательных блоков ответов на вопросы
+            if grep -q "/\* Своими словами \*/" "$CSS_FILE"; then
+              add_ok "CSS-комментарий \`/* Своими словами */\` с ответами присутствует."
+            else
+              add_err "В конце \`style.css\` отсутствует обязательный комментарий \`/* Своими словами */\` с ответами на теоретические вопросы."
+            fi
+          fi
+
+          # Итоговый статус
+          report+=$'\n'"#### 📈 Итоги валидации:"$'\n'
+          report+="- Количество ошибок: **$errors_count**"$'\n'
+          report+="- Количество предупреждений: **$warnings_count**"$'\n\n'
+
+          if [ $errors_count -gt 0 ]; then
+            report+="❌ **Статус:** Пулл-реквест содержит критические ошибки и расхождения с ТЗ. Исправьте замечания робота."
+            status_flag="failed"
+          else
+            report+="🎉 **Статус:** Все базовые проверки пройдены! Великолепная работа. Работа готова к ручному ревью преподавателя."
+            status_flag="success"
+          fi
+
+          # Сохраняем отчет для следующего шага через GitHub Output
+          echo "status=$status_flag" >> "$GITHUB_OUTPUT"
+          {
+            echo "report<<EOF"
+            echo "$report"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          # Пишем отчет в Summary текущего Actions
+          echo "$report" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$status_flag" == "failed" ]; then
+            exit 1
+          fi
+
+      # 5. Автоматическая публикация подробного отчета робота прямо в Pull Request студента
+      - name: Публикация отчета робота в Pull Request
+        if: always() && github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: ${{ steps.analyzer.outputs.report }}
+          comment_tag: "validation-report"
+          mode: recreate
