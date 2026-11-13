@@ -224,3 +224,20 @@ jobs:
           message: ${{ steps.analyzer.outputs.report }}
           comment_tag: "validation-report"
           mode: recreate
+      
+      # 7. Автоматическое одобрение (Approve) PR при успешной проверке
+      - name: Автоматический Approve от робота
+      if: github.event_name == 'pull_request' && steps.analyzer.outputs.status == 'success'
+env:
+GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+run: |
+gh pr review "${{ github.event.pull_request.number }}" --approve --body "✅ Автоматический Approve: код, формулы Анти-ИИ и история Git-коммитов полностью соответствуют ТЗ."
+
+# 8. Запрос изменений (Request Changes) при провале проверки
+- name: Отклонение PR при наличии ошибок
+if: failure() && github.event_name == 'pull_request' && steps.analyzer.outputs.status == 'failed'
+env:
+GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+run: |
+gh pr review "${{ github.event.pull_request.number }}" --request-changes --body "❌ Обнаружены ошибки в коде или коммитах. Подробности в отчете робота выше."
+
