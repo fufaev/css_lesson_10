@@ -1,0 +1,17 @@
+.main-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-menu ul {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+}
+
+.logout-btn {
+  margin-left: auto;
+}
