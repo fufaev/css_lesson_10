@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Базовые декоративные стили для Практической работы №10
+   ========================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f4f6f9;
+  color: #212529;
+  padding: 2rem;
+  line-height: 1.5;
+}
+
+.main-header {
+  background-color: #1a1a2e;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.nav-menu ul {
+  list-style: none;
+}
+
+.nav-link {
+  color: #adb5bd;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: white;
+}
+
+.logout-btn {
+  background-color: #fa5252;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #e03131;
+}
+
+.stat-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+.stat-card.is-lead {
+  border-left: 5px solid #4c6ef5;
+}
+
+.card-header h3 {
+  font-size: 1.15rem;
+  color: #495057;
+}
+
+.card-desc {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.meta-list {
+  background-color: #f8f9fa;
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.meta-list dt {
+  font-weight: 600;
+  color: #495057;
+}
+
+.meta-list dd {
+  color: #212529;
+  margin-bottom: 0.2rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  background-color: #edf2ff;
+  color: #4c6ef5;
+}
+
+/* ==========================================================================
+   РЕШЕНИЕ ПРАКТИЧЕСКОЙ (FLEXBOX)
+   ========================================================================== */
+
+.main-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-menu ul {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+}
+
+.logout-btn {
+  margin-left: auto;
+}
+
+.dashboard-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.stat-card {
+  flex: 1 1 276px;
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-list {
+  margin-top: auto;
+}
+
+:focus-visible {
+  outline: 2px dashed #4c6ef5;
+  outline-offset: 4px;
+}
+
+/* Своими словами */
+/*
+1. За одинаковую высоту элементов в ряду (при flex-direction: row) отвечает свойство align-items. По умолчанию оно имеет значение stretch, которое и растягивает карточки на всю высоту строки.
+2. Значение auto в flex-basis указывает браузеру опираться на базовый размер самого контента внутри элемента (или на явно заданные свойства width/height), прежде чем распределять оставшееся свободное пространство.
+3. Комбинация flex: 1 0 auto означает, что элемент может растягиваться (flex-grow: 1), но ему строго запрещено сжиматься (flex-shrink: 0) меньше его базового размера контента. При дефиците места в контейнере такой элемент не станет ужиматься и может вылезти за пределы родителя (случится переполнение).
+*/
