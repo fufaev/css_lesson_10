@@ -15,3 +15,13 @@
 .logout-btn {
   margin-left: auto;
 }
+
+.dashboard-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.stat-card {
+  flex: 1 1 276px;
+}
