@@ -116,8 +116,8 @@ jobs:
 
           report+=$'\n'"#### 🧠 Данные студента и расчет параметров Анти-ИИ:"$'\n'
           report+="- **Студент:** $last_name $first_name (Группа: $group)"$'\n'
-          report+="- Подсчитанная длина фамилии ($N букв) -> \`flex-basis\` = **${expected_basis}px** [1.11]"$'\n'
-          report+="- Подсчитанная длина имени ($M букв) -> \`gap\` = **${expected_gap}px** [1.11]"$'\n\n'
+          report+="- Подсчитанная длина фамилии ($N букв) -> \`flex-basis\` = **${expected_basis}px**"$'\n'
+          report+="- Подсчитанная длина имени ($M букв) -> \`gap\` = **${expected_gap}px**"$'\n\n'
 
           HTML_FILE="$STUDENT_DIR/index.html"
           CSS_FILE="$STUDENT_DIR/css/style.css"
@@ -131,37 +131,37 @@ jobs:
             css_clean=$(tr -d '[[:space:]]' < "$CSS_FILE")
 
             if [[ "$css_clean" =~ flex-basis:${expected_basis}px ]]; then
-              add_ok "Индивидуальный \`flex-basis\` карточки (${expected_basis}px) настроен верно. [1.11]"
+              add_ok "Индивидуальный \`flex-basis\` карточки (${expected_basis}px) настроен верно."
             else
-              add_err "Нарушение формулы Анти-ИИ: \`flex-basis\` должен быть **${expected_basis}px**. [1.11]"
+              add_err "Нарушение формулы Анти-ИИ: \`flex-basis\` должен быть **${expected_basis}px**."
             fi
 
             if [[ "$css_clean" =~ gap:${expected_gap}px ]]; then
-              add_ok "Индивидуальный \`gap\` контейнеров (${expected_gap}px) настроен верно. [1.11]"
+              add_ok "Индивидуальный \`gap\` контейнеров (${expected_gap}px) настроен верно."
             else
-              add_err "Нарушение формулы Анти-ИИ: \`gap\` должен быть **${expected_gap}px**. [1.11]"
+              add_err "Нарушение формулы Анти-ИИ: \`gap\` должен быть **${expected_gap}px**."
             fi
 
             if grep -q "<header" "$HTML_FILE" && grep -q "<main" "$HTML_FILE"; then
-              add_ok "Семантическая структура HTML (<header>, <main>) соблюдена. [1.11]"
+              add_ok "Семантическая структура HTML (<header>, <main>) соблюдена."
             else
-              add_err "Нарушение семантики HTML: Вы обязаны использовать теги \`<header>\` и \`<main>\`. [1.11]"
+              add_err "Нарушение семантики HTML: Вы обязаны использовать теги \`<header>\` и \`<main>\`."
             fi
 
             if [[ "$css_clean" =~ margin-left:auto ]]; then
-              add_ok "Применение \`margin-left: auto\` для кнопки выхода обнаружено. [1.11]"
+              add_ok "Применение \`margin-left: auto\` для кнопки выхода обнаружено."
             else
-              add_warn "Рекомендуется использовать \`margin-left: auto\` для выталкивания кнопки выхода к правому краю (уровни Junior/Pro). [1.11]"
+              add_warn "Рекомендуется использовать \`margin-left: auto\` для выталкивания кнопки выхода к правому краю (уровни Junior/Pro)."
             fi
 
             if grep -q "/\* Своими словами \*/" "$CSS_FILE"; then
-              add_ok "CSS-комментарий \`/* Своими словами */\` с ответами присутствует. [1.11]"
+              add_ok "CSS-комментарий \`/* Своими словами */\` с ответами присутствует."
             else
-              add_err "В конце файла отсутствует комментарий \`/* Своими словами */\` с развернутыми теоретическими ответами! [1.11]"
+              add_err "В конце файла отсутствует комментарий \`/* Своими словами */\` с развернутыми теоретическими ответами!"
             fi
           fi
 
-          # 5. 🛠 НОВЫЙ БЛОК: Экспертный Git Commit Линтер
+          # 5. Экспертный Git Commit Линтер
           report+=$'\n'"#### 📜 Валидация истории коммитов Git (Уровни Junior/Pro):"$'\n'
           
           # Получаем сообщения всех коммитов текущей ветки относительно main
@@ -173,20 +173,20 @@ jobs:
           commit_count=${#commit_messages[@]}
           report+="- Всего коммитов в Вашем Pull Request: **$commit_count**"$'\n'
 
-          # Проверка на количество коммитов (ТЗ требует строго 4 или 5) [1.11]
+          # Проверка на количество коммитов (ТЗ требует строго 4 или 5)
           if [ "$commit_count" -lt 4 ] || [ "$commit_count" -gt 5 ]; then
-            add_warn "По ТЗ на уровнях Junior/Pro должно быть сделано ровно 4 или 5 содержательных коммитов. У Вас: $commit_count. [1.11]"
+            add_warn "По ТЗ на уровнях Junior/Pro должно быть сделано ровно 4 или 5 содержательных коммитов. У Вас: $commit_count."
           fi
 
           # Разрешенные регулярные теги для коммитов
-          valid_tag_regex="^\[flex-(nav|grid|card-inner|a11y)\]" [1.11]
+          valid_tag_regex="^\[flex-(nav|grid|card-inner|a11y)\]"
           bad_commits=0
 
           for msg in "${commit_messages[@]}"; do
             if [[ "$msg" =~ $valid_tag_regex ]]; then
               report+="  - ✅ Коммит: \`$msg\` (Семантический тег валиден)"$'\n'
             else
-              report+="  - ❌ Коммит: \`$msg\` (Ошибка! Сообщение должно начинаться с [flex-nav], [flex-grid], [flex-card-inner] или [flex-a11y]) [1.11]"$'\n'
+              report+="  - ❌ Коммит: \`$msg\` (Ошибка! Сообщение должно начинаться с [flex-nav], [flex-grid], [flex-card-inner] или [flex-a11y])"$'\n'
               bad_commits=$((bad_commits+1))
             fi
           done
@@ -194,7 +194,7 @@ jobs:
           if [ $bad_commits -gt 0 ]; then
             add_err "В истории Git обнаружено $bad_commits коммитов с некорректными сообщениями. Отредактируйте историю через \`git rebase -i\`."
           else
-            add_ok "Все коммиты оформлены строго по семантическому стандарту ТЗ! [1.11]"
+            add_ok "Все коммиты оформлены строго по семантическому стандарту ТЗ!"
           fi
 
           # Итоговый статус
@@ -218,8 +218,8 @@ jobs:
 
       # 6. Публикация развернутого ответа робота прямо в Pull Request студента
       - name: Публикация отчета робота в Pull Request
-        if: always() && github.event_name == 'pull_request'
-        uses: thollander/actions-comment-pull-request@v2
+        if: always() && github.event_name == 'pull_request' && steps.analyzer.outputs.report != ''
+        uses: thollander/actions-comment-pull-request@v3
         with:
           message: ${{ steps.analyzer.outputs.report }}
           comment_tag: "validation-report"
