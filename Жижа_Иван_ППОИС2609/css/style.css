@@ -1,0 +1,197 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f4f6f9;
+  color: #212529;
+  padding: clamp(1rem, 4vw, 2rem);
+  line-height: 1.5;
+}
+
+.main-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background-color: #1a1a2e;
+  color: #ffffff;
+  padding: 1rem clamp(1rem, 3vw, 1.5rem);
+  border-radius: 6px;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.nav-menu ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+}
+
+.nav-link {
+  background-color: #1a1a2e;
+  color: #adb5bd;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  background-color: #1a1a2e;
+  color: #ffffff;
+}
+
+.logout-btn {
+  margin-left: auto;
+  background-color: #c92a2a;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #a61e1e;
+  color: #ffffff;
+}
+
+.dashboard-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 228px;
+  min-width: 0;
+  gap: 12px;
+  background-color: #ffffff;
+  color: #212529;
+  border-radius: 8px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+.stat-card.is-lead {
+  border-left: 5px solid #4c6ef5;
+}
+
+.card-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-header h2 {
+  font-size: 1.15rem;
+  background-color: #ffffff;
+  color: #495057;
+}
+
+.card-desc {
+  background-color: #ffffff;
+  color: #6c757d;
+  font-size: 0.9rem;
+  overflow-wrap: break-word;
+}
+
+.meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: auto;
+  background-color: #f8f9fa;
+  color: #212529;
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.meta-list dt {
+  flex: 0 0 40%;
+  min-width: 0;
+  font-weight: 600;
+  background-color: #f8f9fa;
+  color: #495057;
+  overflow-wrap: break-word;
+}
+
+.meta-list dd {
+  flex: 1 1 calc(60% - 12px);
+  min-width: 0;
+  background-color: #f8f9fa;
+  color: #212529;
+  overflow-wrap: break-word;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  background-color: #edf2ff;
+  color: #4c6ef5;
+}
+
+.nav-link:focus-visible,
+.logout-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+@media (min-width: 1024px) {
+  .stat-card.is-lead {
+    order: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-menu {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+}
+
+/* Своими словами */
+
+/*
+1. Свойство align-items: stretch растягивает элементы
+   по поперечной оси. Поэтому карточки в пределах одного
+   ряда имеют одинаковую высоту независимо от содержимого.
+
+2. Значение auto у flex-basis определяет начальный размер
+   элемента на основе заданного размера по главной оси,
+   а при его отсутствии — на основе содержимого.
+
+3. При flex: 1 0 auto элемент может увеличиваться при наличии
+   свободного пространства, но не может сжиматься.
+   При недостатке места он сохраняет базовый размер,
+   переносится на другую строку при flex-wrap: wrap
+   или может вызвать переполнение контейнера.
+*/
